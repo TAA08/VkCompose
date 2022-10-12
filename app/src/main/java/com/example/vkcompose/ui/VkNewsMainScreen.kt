@@ -1,23 +1,23 @@
 package com.example.vkcompose.ui
 
-import android.util.Log
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.dp
+import com.example.vkcompose.MainViewModel
+import com.example.vkcompose.domain.FeedPost
 
 @Composable
-fun MainScreen() {
-    val snackBarHostState = SnackbarHostState()
+fun MainScreen(viewModel: MainViewModel) {
+
     val scope = rememberCoroutineScope()
-    val fabIsVisible = remember {
-        mutableStateOf(true)
-    }
+    val feedPostState = viewModel.feedPostState.observeAsState(FeedPost())
 
 //    Log.d("MainScreen", "Recomposition2 ${fabIsVisible.value}")
 
@@ -50,36 +50,17 @@ fun MainScreen() {
                         unselectedContentColor = MaterialTheme.colors.onSecondary
                     )
                 }
-
-
             }
         },
-        floatingActionButton = {
-            Log.d("MainScreen", "Recomposition floatingActionButton")
-            if (fabIsVisible.value) {
-                FloatingActionButton(onClick = {
-                    scope.launch {
-                        val action = snackBarHostState.showSnackbar(
-                            message = "Это текст snackBar",
-                            actionLabel = "Скрыть кнопку",
-                            duration = SnackbarDuration.Long
-                        )
-                        if (action == SnackbarResult.ActionPerformed) {
-                            fabIsVisible.value = false
-                        }
-                    }
 
-                }) {
-                    Icon(imageVector = Icons.Rounded.Favorite, contentDescription = null)
-                }
-            }
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
-            Log.d("MainScreen", "Recomposition snackbarHost")
-        }
-    ) {
-
-
+        ) {
+        PostCard(
+            modifier = Modifier.padding(8.dp),
+            fedPost = feedPostState.value,
+            onViewClickListener = viewModel::changePostState,
+            onCommentClickListener = viewModel::changePostState,
+            onLikeClickListener = viewModel::changePostState,
+            onShareClickListener = viewModel::changePostState,
+        )
     }
 }
