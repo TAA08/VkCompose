@@ -1,6 +1,5 @@
 package com.example.vkcompose.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -8,15 +7,21 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.vkcompose.MainViewModel
+import com.example.vkcompose.navigation.AppNavGraph
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
 
     val scope = rememberCoroutineScope()
 //    Log.d("MainScreen", "Recomposition2 ${fabIsVisible.value}")
-    val selectedNavItem by viewModel.selectedNavItem.observeAsState(NavigationItem.Home)
+//    val selectedNavItem by viewModel.selectedNavItem.observeAsState(NavigationItem.Home)
+    val navHostController = rememberNavController()
+    val navBackStackEntry by navHostController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
@@ -30,8 +35,8 @@ fun MainScreen(viewModel: MainViewModel) {
                     )
                 items.forEach { item ->
                     BottomNavigationItem(
-                        selected = selectedNavItem == item,
-                        onClick = { viewModel.navigate(item) },
+                        selected = currentRoute == item.screen.route,
+                        onClick = { navHostController.navigate(item.screen.route) },
                         icon = {
                             Icon(
                                 imageVector = item.icon,
@@ -47,19 +52,16 @@ fun MainScreen(viewModel: MainViewModel) {
                 }
             }
         },
-
-        ) { paddingValues ->
-        when (selectedNavItem) {
-            NavigationItem.Home -> {
-                HomeScreen(viewModel = viewModel, paddingValues = paddingValues)
-            }
-            NavigationItem.Favourite -> {
-                Text(text = "Favourite", color = Color.Black)
-            }
-            NavigationItem.Profile -> {
-                Text(text = "ProfileGI", color = Color.Black)
-            }
-        }
-
+    ) { paddingValues ->
+        AppNavGraph(
+            navHostController = navHostController,
+            homeScreenContent = {
+                HomeScreen(
+                    viewModel = viewModel,
+                    paddingValues = paddingValues
+                )
+            },
+            favouriteScreenContent = { Text(text = "Favourite", color = Color.Black) },
+            profileScreenContent = { Text(text = "ProfileGI", color = Color.Black) })
     }
 }

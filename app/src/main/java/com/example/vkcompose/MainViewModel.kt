@@ -18,13 +18,6 @@ class MainViewModel : ViewModel() {
     private val _listVkPost = MutableLiveData<List<FeedPost>>(sourcePost)
     val listVkPost: LiveData<List<FeedPost>> get() = _listVkPost
 
-    private val _selectedNavItem = MutableLiveData<NavigationItem>(NavigationItem.Home)
-    val selectedNavItem: LiveData<NavigationItem> get() = _selectedNavItem
-
-    fun navigate(item: NavigationItem){
-        _selectedNavItem.value = item
-    }
-
     fun changePostState(post: FeedPost, item: StatisticItem) {
 //        получаем список постов
         val oldPost = listVkPost.value?.toMutableList() ?: mutableListOf()
