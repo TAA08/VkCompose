@@ -5,14 +5,31 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.vkcompose.domain.FeedPost
 import com.example.vkcompose.domain.StatisticItem
+import com.example.vkcompose.ui.NavigationItem
 
 class MainViewModel : ViewModel() {
 
-    private val _feedPostState = MutableLiveData(FeedPost())
-    val feedPostState: LiveData<FeedPost> get() = _feedPostState
+    private val sourcePost = mutableListOf<FeedPost>().apply {
+        repeat(20) {
+            add(FeedPost(id = it))
+        }
+    }
 
-    fun changePostState(item: StatisticItem) {
-        val oldStatistic = feedPostState.value?.statisticItems ?: throw IllegalStateException()
+    private val _listVkPost = MutableLiveData<List<FeedPost>>(sourcePost)
+    val listVkPost: LiveData<List<FeedPost>> get() = _listVkPost
+
+    private val _selectedNavItem = MutableLiveData<NavigationItem>(NavigationItem.Home)
+    val selectedNavItem: LiveData<NavigationItem> get() = _selectedNavItem
+
+    fun navigate(item: NavigationItem){
+        _selectedNavItem.value = item
+    }
+
+    fun changePostState(post: FeedPost, item: StatisticItem) {
+//        получаем список постов
+        val oldPost = listVkPost.value?.toMutableList() ?: mutableListOf()
+//        получпем список элементов статистики
+        val oldStatistic = post.statisticItems
         val newStatistic = oldStatistic.toMutableList().apply {
             replaceAll { oldItem ->
                 if (oldItem.type == item.type) {
@@ -22,6 +39,23 @@ class MainViewModel : ViewModel() {
                 }
             }
         }
-        _feedPostState.value = feedPostState.value?.copy(statisticItems = newStatistic)
+//        получаем пост с измененной статистикой
+        val newFeedPost = post.copy(statisticItems = newStatistic)
+//        заменяем список постов на список с измененным постом
+        _listVkPost.value = oldPost.apply {
+            replaceAll { oldPost ->
+                if (oldPost.id == newFeedPost.id) {
+                    newFeedPost
+                } else {
+                    oldPost
+                }
+            }
+        }
+    }
+
+    fun deletePost(post: FeedPost) {
+        val oldPost = listVkPost.value?.toMutableList() ?: mutableListOf()
+        oldPost.remove(post)
+        _listVkPost.value = oldPost
     }
 }

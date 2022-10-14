@@ -1,42 +1,37 @@
 package com.example.vkcompose.ui
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.example.vkcompose.MainViewModel
-import com.example.vkcompose.domain.FeedPost
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
 
     val scope = rememberCoroutineScope()
-    val feedPostState = viewModel.feedPostState.observeAsState(FeedPost())
-
 //    Log.d("MainScreen", "Recomposition2 ${fabIsVisible.value}")
+    val selectedNavItem by viewModel.selectedNavItem.observeAsState(NavigationItem.Home)
 
     Scaffold(
         bottomBar = {
             BottomNavigation() {
-                val selectedPosition = remember {
-                    mutableStateOf(0)
-                }
+
                 val items =
                     listOf(
                         NavigationItem.Home,
                         NavigationItem.Profile,
                         NavigationItem.Favourite
                     )
-                items.forEachIndexed { index, item ->
+                items.forEach { item ->
                     BottomNavigationItem(
-                        selected = selectedPosition.value == index,
-                        onClick = { selectedPosition.value = index },
+                        selected = selectedNavItem == item,
+                        onClick = { viewModel.navigate(item) },
                         icon = {
                             Icon(
                                 imageVector = item.icon,
@@ -53,14 +48,18 @@ fun MainScreen(viewModel: MainViewModel) {
             }
         },
 
-        ) {
-        PostCard(
-            modifier = Modifier.padding(8.dp),
-            fedPost = feedPostState.value,
-            onViewClickListener = viewModel::changePostState,
-            onCommentClickListener = viewModel::changePostState,
-            onLikeClickListener = viewModel::changePostState,
-            onShareClickListener = viewModel::changePostState,
-        )
+        ) { paddingValues ->
+        when (selectedNavItem) {
+            NavigationItem.Home -> {
+                HomeScreen(viewModel = viewModel, paddingValues = paddingValues)
+            }
+            NavigationItem.Favourite -> {
+                Text(text = "Favourite", color = Color.Black)
+            }
+            NavigationItem.Profile -> {
+                Text(text = "ProfileGI", color = Color.Black)
+            }
+        }
+
     }
 }

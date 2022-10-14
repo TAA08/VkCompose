@@ -37,7 +37,8 @@ fun PostCard(
     onCommentClickListener: (StatisticItem) -> Unit,
 ) {
     Card(
-        modifier = modifier, border = BorderStroke(width = 1.dp, color = Color.Black)
+        modifier = modifier,
+        border = BorderStroke(width = 1.dp, color = Color.Black)
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
             PostTitle(fedPost)
